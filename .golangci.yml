@@ -1,0 +1,70 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - exhaustruct       # Requires every struct field to be initialized
+    - exhaustruct_v5    # Replaces exhaustruct since golangci-lint v2.13
+    - wsl               # Whitespace/style only
+    - varnamelen        # Often too opinionated
+    - depguard          # Only useful if you restrict imports
+    - testpackage       # Forces external test packages
+    - ireturn           # Discourages returning interfaces
+    - wrapcheck         # Requires wrapping every error
+    - err113            # Forces sentinel/static errors
+    - funlen            # Maximum function length
+    - gocognit          # Cognitive complexity
+    - cyclop            # Cyclomatic complexity
+    - lll               # Line length
+    - gomodguard        # Deprecated
+    - noinlineerr       # Forces to not use inline error handling
+  settings:
+    dupword:
+      # The order_by syntax legitimately repeats this keyword: "desc desc"
+      # orders a field named desc descending. The auto-fix would otherwise
+      # rewrite test inputs and doc comments.
+      ignore:
+        - desc
+    goconst:
+      ignore-tests: true
+    exhaustive:
+      # A switch with a default branch handles the remaining cases.
+      default-signifies-exhaustive: true
+  exclusions:
+    rules:
+      # Table-driven tests legitimately use package-level fixtures and grow
+      # large; examples use direct type assertions for documentation clarity.
+      - path: _test\.go
+        linters:
+          - gochecknoglobals
+          - maintidx
+          - forcetypeassert
+      # Execution tests assemble SQL queries from the fragments under test.
+      - path: _test\.go
+        linters:
+          - gosec
+        text: G20(1|2)
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/AndreiCocan/golang-aip)
+        - prefix(github.com/AndreiCocan/golang-aip-postgres)
+      custom-order: true
+    gofumpt:
+      module-path: github.com/AndreiCocan/golang-aip-postgres
+      extra:
+        group-params: true
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  fix: true
+run:
+  timeout: 5m
